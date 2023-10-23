@@ -1,0 +1,76 @@
+import subprocess
+import time
+import yaml
+from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+
+# Path to the YAML configuration file
+config_file_path = '/opt/apps/gxadm/xtest/tuxedo_monitor_config.yaml'
+
+def run_command_and_parse(application):
+    command = application['command']
+    try:
+        output = subprocess.check_output(command, shell=True)
+        return output
+    except Exception as e:
+        print("Error running command:", e)
+        return ""
+
+def parse_tuxedo_status(output, app_name):
+    tuxedo_status = None
+    for line in output.splitlines():
+        parts = line.strip().split()
+        if len(parts) >= 6 and parts[5] == "running":
+            tuxedo_status = parts[6:]
+            break
+    if tuxedo_status:
+        return {
+            'application': app_name,
+            'tuxedo_application': tuxedo_status[0],
+            'tuxedo_processes': tuxedo_status[1],
+            'tuxedo_status': tuxedo_status[2]
+        }
+    else:
+        return {
+            'application': app_name,
+            'tuxedo_application': 'N/A',
+            'tuxedo_processes': 'N/A',
+            'tuxedo_status': 'N/A'
+        }
+
+def collect_metrics():
+    all_metrics = []
+    with open(config_file_path, 'r') as config_file:
+        config = yaml.safe_load(config_file)
+
+    for application in config['applications']:
+        app_name = application['name']
+        output = run_command_and_parse(application)
+        metrics = parse_tuxedo_status(output, app_name)
+        all_metrics.append(metrics)
+
+    return all_metrics
+
+class MetricsHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/plain')
+        self.end_headers()
+
+        all_metrics = collect_metrics()
+        formatted_metrics = "\n".join([
+            "application: %s\ntuxedo_application: %s\ntuxedo_processes: %s\ntuxedo_status: %s\n" % (
+                metric['application'], metric['tuxedo_application'], metric['tuxedo_processes'], metric['tuxedo_status']
+            ) for metric in all_metrics])
+
+        self.wfile.write(formatted_metrics)
+
+def main():
+    try:
+        server = HTTPServer(('127.0.0.1', 8000), MetricsHandler)
+        print('Started HTTP server on port', 8000)
+        server.serve_forever()
+    except KeyboardInterrupt:
+        server.socket.close()
+
+if __name__ == "__main__":
+    main()
