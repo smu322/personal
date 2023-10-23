@@ -1,0 +1,61 @@
+I have a YAML File whose content looks like below.
+
+http_port: 8000
+frequency: 60
+
+applications:
+  - name: TOP
+    command: gxrun TOP gx_watch
+  - name: GCSS
+    command: gxrun GCSS gx_watch
+
+Now I need a python script, that is compatible with python 2.7 version and it should not have any dependencies on the third party libraries. I only have those libraries that come by default with python 2.7. 
+
+The python script must execute the commands that i will be listing in the yaml file and parse the output line by line and expose the metrics as I have explained below.
+
+the yaml will be present in location /opt/apps/gxadm/xtest/tuxedo_monitor_config.yaml
+
+the python script keep exposing continuously the metrics in prometheus format at a HTTP endpoint at the port that is specified in the yaml file and at the frequency mentioned in the yaml file. 
+If no port or frequency is specified in yaml file, then default port must be 8000 and default frequency must be 60 and please frequency will be in seconds.
+
+Now coming to logic for capturing the metrics by parsing the output of the command..
+
+if the line is similar to this pattern : Normal: comp=TOP All 10 Tuxedo processes are running
+
+then parse as below..
+
+tuxedo_process_status = Normal [ 2 if Normal, 1 if critical and 0 if anything else) ==> this should be the metric
+tuxedo_running_process = 10 ==> this should be the metric
+tux_comp = TOP  ==> This should be a label for metrics tuxedo_process_status, tuxedo_running_process
+tux_process_status_message = All 10 Tuxedo processes are running
+
+If the line similar to this pattern: Normal: comp=TOP all proxies are running
+
+tuxedo_proxy_status = Normal [ 2 if Normal, 1 if critical and 0 if anything else] ==> this should be a metric
+tux_comp = TOP [ this is similar to the label I mentioned above] ==> this should be a label for tuxedo_proxy_status metric
+tux_proxy_status_message = all proxies are running ==> this should be a label for tuxedo_proxy_status metric
+
+if the last part of the line is 'all proxies are running' then,
+
+tuxedo_missing_proxies = 0  ==> this should be metric [ Labels with this metric are tux_comp, tux_proxy_status_message]
+
+or if the last part of the line is '10 proxies missing' then,
+
+tuxedo_missing_proxies = 10 ==> this should be a metric [ Labels with this metric are tux_comp, tux_proxy_status_message]
+
+
+if the line is similar to this pattern: Normal: all proxies are running
+tuxedo_proxy_status = Normal [ 2 if Normal, 1 if critical and 0 if anything else] ==> this should be a metric
+tux_comp value should be exactly same as it is for for tux_comp label that is part of tux_process_status metric
+tuxedo_missing_proxies = 0 ==> this should be metric
+tux_proxy_status_message = all proxies are running ==> this should be a label
+
+if the line is similar to this pattern: Critical: 8 proxies are running
+tuxedo_proxy_status = Critical [ 2 if Normal, 1 if critical and 0 if anything else] ==> this should be a metric
+tux_comp value should be exactly same as it is for for tux_comp label that is part of tux_process_status metric
+tuxedo_missing_proxies = 8 ==> this should be metric
+tux_proxy_status_message = 8 proxies are running ==> this should be a label
+
+Ignore any other line from the output of the command you execute..
+
+Please note that I will run this python script as daemon.
