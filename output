@@ -1,3 +1,166 @@
+application: TOP
+command: gxrun TOP gx_watch
+output:
+
+/opt/apps/gxadm
+Running gx_watch for TOP ......
+Normal: comp=TOP All 10 Tuxedo processes are running
+-------------------------------------------------------------------------------------------------
+Checking proxies uid=gxadm uid_req=gxadm appl=TOP config=/opt/apps/gxadm/TOP/tools/start_proxies
+
+1 GSAID=1000 service=ToP appl=Proxy sleep=10000000 running
+1 GSAID=1001 service=ToP appl=Recovery sleep=20000000 running
+1 GSAID=1011 service=TOPWeeklySat appl=Recovery section=TOPCLEANUP running
+Normal: comp=TOP all proxies are running
+
+
+application: GCSS
+command: gxrun GCSS gx_watch
+output:
+
+/opt/apps/gxadm
+Running gx_watch for  GCSS......
+Normal: comp=GCSS All 205 Tuxedo processes are running
+-------------------------------------------------------------------------------------------------
+Checking proxies uid=gxadm uid_req=gxadm appl=GCSS config=/opt/apps/gxadm/GCSS/tools/start_proxies
+
+1 GSAID=1 service=GQ appl=Proxy sleep=1000000 running
+1 GSAID=2 service=GQ appl=Proxy section=GQ_RKEM running
+1 GSAID=3 service=GQ appl=Proxy section=GQ_MDWS running
+2 GSAID=4 service=GQ appl=Proxy section=GQ_SSP running
+1 GSAID=5 service=GQ appl=Proxy section=GQ_VV running
+1 GSAID=6 service=GQ appl=Proxy section=GQ_WCRS running
+1 GSAID=7 service=GQ appl=Proxy section=GQ_WORKFLOW running
+1 GSAID=8 service=GQ appl=Proxy section=GQ_TRACKING running
+1 GSAID=9 service=GQ appl=Proxy section=GQ_GEMS running
+1 GSAID=12 service=GQ appl=Proxy section=GQ_SSIB running
+1 GSAID=10 service=CarrierReplication,FactCreditCheckReplication,FACTCustomerReplication,FACTCBUReplication,GeoReplication,GSISReplication,INLCReplication,MARSFreightTypeFeed,RKDCProfileReplication,ServiceReplication,VesselReplication,WKEDLook appl=Proxy section=EXTDATA running
+1 GSAID=11 service=CarrierReplication,FactCreditCheckReplication,FACTCustomerReplication,FACTCBUReplication,GeoReplication,GSISReplication,INLCReplication,MARSFreightTypeFeed,RKDCProfileReplication,ServiceReplication,VesselReplication,WKEDLook inifile=$HOME/GCSS/config/gcss.gsa.ini  running
+1 GSAID=130 service=RKEMReplication appl=Proxy section=EXTDATA_RKEM running
+1 GSAID=131 service=RKEMReplication appl=Recovery section=EXTDATA_RKEM running
+1 GSAID=140 service=FUI appl=Proxy section=FUI_GSA running
+1 GSAID=144 service=FUI appl=Proxy section=FUI_GLEO running
+1 GSAID=148 service=FUI appl=Proxy section=FUI_SSIB running
+1 GSAID=154 service=FUI appl=Proxy section=FUI_EMP running
+1 GSAID=150 service=ArchDisp appl=Recovery section=GCSS_ARCHIVING running
+1 GSAID=151 service=ArchScanner appl=Recovery section=GCSS_ARCHIVING running
+1 GSAID=152 service=ArchWorker appl=Proxy section=GCSS_ARCHIVING running
+1 GSAID=153 service=ArchWorker appl=Recovery section=GCSS_ARCHIVING running
+1 GSAID=160 service=FactFreightRelease appl=Proxy section=GCSS_GSA running
+1 GSAID=161 service=TPDoc appl=Recovery section=GCSS_GSA running
+1 GSAID=162 service=TEPReceive appl=Proxy section=GCSS_GSA running
+1 GSAID=170 service=GSISExportServiceUpdate appl=Proxy section=GCSS_GSA running
+1 GSAID=171 service=RouteCodeReplication appl=Proxy section=GCSS_GSA running
+1 GSAID=180 service=HaulageWorkorderReply appl=Proxy section=GCSS_GSA running
+1 GSAID=181 service=CM appl=Proxy section=OA running
+1 GSAID=190 service=ETATranslation appl=Proxy section=GCSS_GSA running
+1 GSAID=192 service=ConsumeCommitmentReply appl=Proxy section=GCSS_GSA running
+1 GSAID=193 service=BatchConsumeCommitmentReq appl=Proxy section=GCSS_GSA running
+1 GSAID=197 service=ShipmentDnDDetailsRequest appl=Proxy sleep=1000000 running
+1 GSAID=199 service=CalculateLFDForContResponse appl=Proxy section=GCSS_GSA running
+1 GSAID=200 service=CATReceive appl=Proxy section=GCSS_GSA running
+1 GSAID=210 service=Shipment appl=Recovery section=GCSS_GSA running
+1 GSAID=220 service=HERMESReceive appl=Proxy section=GCSS_GSA running
+1 GSAID=221 service=HERMESReceive appl=Recovery section=GCSS_GSA running
+1 GSAID=240 service=DocBroker2DPE appl=Proxy section=DPEGSA running
+1 GSAID=241 service=DocBroker2DPE appl=Recovery section=DPEGSA running
+1 GSAID=250 service=OANotify appl=Proxy section=OANOTIFY running
+1 GSAID=251 service=OANotify appl=Recovery section=OANOTIFY running
+2 GSAID=253 service=EventBasedDataDistribution appl=Proxy section=GCSS_GSA running
+1 GSAID=254 service=EventBasedDataDistribution appl=Recovery section=GCSS_GSA running
+1 GSAID=256 service=HERMESSend appl=Proxy section=GCSS_GSA running
+1 GSAID=257 service=HERMESSend appl=Recovery section=GCSS_GSA running
+1 GSAID=263 service=AutoUTMRequest appl=Proxy section=AutoUTMRequest running
+1 GSAID=265 service=AutoRepriceWorker appl=Proxy section=AutoReprice running
+1 GSAID=285 service=BatchRepriceWorker appl=Proxy section=BatchReprice running
+1 GSAID=295 service=AutoPreliminaryBookingWorker appl=Proxy section=AutoPreliminaryBookingStatusChange running
+1 GSAID=300 service=CMDCustomerInfoUpdateWorker appl=Proxy section=EXTDATA running
+1 GSAID=301 service=BatchCommandProcessor appl=Proxy section=BatchCommandProcessor running
+1 GSAID=302 service=BatchCommandProcessor appl=Recovery section=BatchCommandProcessor running
+1 GSAID=315 service=AutoStandaloneInvoicingWorker appl=Proxy section=AutoStandaloneInvoicing running
+1 GSAID=260 service=Schedule1Sec appl=Recovery section=SCHEDULER running
+1 GSAID=261 service=Schedule30Mins appl=Recovery section=SCHEDULER running
+1 GSAID=267 service=Schedule1Hour appl=Recovery section=SCHEDULER running
+1 GSAID=800 service=ArchBooking,CarrierVirtual,CMDVirtual,DPEVirtual,EBDDVirtual,Equipment,EquipmentNumberVirtual,FACTCBUVirtual,FACTCustomerVirtual,FactCreditCheck,GHDERMailLoader,GeoVirtual,GSISVirtual,TPDocAddressGroup,HERMESSendVirtual,INLCVirtual,MARSFreightTypeFeedVirtual,OANotifyVirtual,RKDCProfileVirtual,SCVVirtual,ServiceCodeVirtual,Shipment,ToP,TPDoc,VesselVirtual,WKEDLookVirtual appl=Cleanup section=GSA_CLEANUP running
+Normal: comp=GCSS all proxies are running
+
+application: GHDER
+command: gxrun GHDER gx_watch
+output:
+
+/opt/apps/gxadm
+Running gx_watch for GHDER ......
+Normal: comp=GHDER All 13 Tuxedo processes are running
+-------------------------------------------------------------------------------------------------
+Checking proxies uid=gxadm uid_req=gxadm appl=GHDER config=/opt/apps/gxadm/GHDER/tools/start_proxies
+
+1 GSAID=900 service=GHDERMailLoader appl=Proxy section=GHDERMailLoad1 running
+Critical: comp=GHDER Missing Proxy process(es) for 'GSAID=907 service=GHDERMailLoader appl=Recovery sleep=600000000'  -- Found 0 out of 1 process(es)
+1 GSAID=900 service=GHDERMailLoader appl=Proxy section=GHDERMailLoad1 running
+Critical: comp=GHDER Missing Proxy process(es) for 'GSAID=901 service=GHDERMailLoader appl=Proxy section=GHDERMailLoad2'  -- Found 0 out of 1 process(es)
+Critical: comp=GHDER Missing Proxy process(es) for 'GSAID=902 service=GHDERMailLoader appl=Proxy section=GHDERMailLoad3'  -- Found 0 out of 1 process(es)
+Critical: comp=GHDER Missing Proxy process(es) for 'GSAID=903 service=GHDERMailLoader appl=Proxy section=GHDERMailLoad4'  -- Found 0 out of 1 process(es)
+Critical: comp=GHDER Missing Proxy process(es) for 'GSAID=904 service=GHDERMailLoader appl=Proxy section=GHDERMailLoad5'  -- Found 0 out of 1 process(es)
+Critical: comp=GHDER Missing Proxy process(es) for 'GSAID=905 service=GHDERMailLoader appl=Proxy section=GHDERMailLoad6'  -- Found 0 out of 1 process(es)
+Critical: comp=GHDER Missing Proxy process(es) for 'GSAID=906 service=GHDERMailLoader appl=Proxy section=GHDERMailLoad7'  -- Found 0 out of 1 process(es)
+Critical: comp=GHDER Missing Proxy process(es) for 'GSAID=907 service=GHDERMailLoader appl=Proxy section=GHDERMailLoad8'  -- Found 0 out of 1 process(es)
+Critical: comp=GHDER Missing Proxy process(es) for 'GSAID=908 service=GHDERMailLoader appl=Proxy section=GHDERMailLoad9'  -- Found 0 out of 1 process(es)
+Critical: comp=GHDER Missing Proxy process(es) for 'GSAID=909 service=GHDERMailLoader appl=Proxy section=GHDERMailLoad10'  -- Found 0 out of 1 process(es)
+1 GSAID=910 service=GHDERMailLoader appl=Recovery sleep=60000000 running
+1 GSAID=911 service=Schedule8Hrs appl=Recovery section=SCHEDULER running
+Critical: comp=GHDER 10 proxies missing
+
+application: REST
+command: gxrun REST gx_watch
+output:
+
+/opt/apps/gxadm
+Running gx_watch for REST ......
+Normal: comp=REST All 9 Tuxedo processes are running
+-------------------------------------------------------------------------------------------------
+Checking proxies uid=gxadm uid_req=gxadm appl=REST config=/opt/apps/gxadm/REST/tools/start_proxies
+
+Normal: all proxies are running
+
+
+application: DPEService
+command: gxrun DPEService gx_watch
+output:
+
+/opt/apps/gxadm
+Running gx_watch for DPEService ......
+Normal: comp=DPEService All 16 Tuxedo processes are running
+-------------------------------------------------------------------------------------------------
+Checking proxies uid=gxadm uid_req=gxadm appl=DPEService config=/opt/apps/gxadm/DPEService/tools/start_proxies
+
+Normal: comp=DPEService all proxies are running
+
+application: MPCService
+command: gxrun MPCService gx_watch
+output:
+
+/opt/apps/gxadm
+Running gx_watch for MPCService ......
+/opt/apps/gxadm/MPCService/MPCService.profile: line 21: ulimit: core file size: cannot modify limit: Operation not permitted
+Normal: comp=MPCService All 6 Tuxedo processes are running
+-------------------------------------------------------------------------------------------------
+Checking proxies uid=gxadm uid_req=gxadm appl=MPCService config=/opt/apps/gxadm/MPCService/tools/start_proxies
+
+Normal: comp=MPCService all proxies are running
+
+
+application: ExternalShellExecutor
+command: gxrun ExternalShellExecutor gx_watch
+output:
+
+/opt/apps/gxadm
+Running gx_watch for ExternalShellExecutor ......
+Normal: comp=ExternalShellExecutor All 15 Tuxedo processes are running
+-------------------------------------------------------------------------------------------------
+Checking proxies uid=gxadm uid_req=gxadm appl=ExternalShellExecutor config=/opt/apps/gxadm/ExternalShellExecutor/tools/start_proxies
+
+Normal: comp=ExternalShellExecutor all proxies are running
+
 
 application: DDREST
 command: gxrun DDREST gx_watch
