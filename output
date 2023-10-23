@@ -1,0 +1,12 @@
+
+application: DDREST
+command: gxrun DDREST gx_watch
+output:
+
+/opt/apps/gxadm
+Running gx_watch for DDREST ......
+Normal: comp=DDREST All 9 Tuxedo processes are running
+-------------------------------------------------------------------------------------------------
+Checking proxies uid=gxadm uid_req=gxadm appl=DDREST config=/opt/apps/gxadm/DDREST/tools/start_proxies
+
+Normal: all proxies are running
