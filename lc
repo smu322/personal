@@ -1,0 +1,122 @@
+import os
+import subprocess
+import time
+import re
+import yaml
+from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+
+# Default values
+default_http_port = 8000
+default_frequency = 60
+config_file_path = '/opt/apps/gxadm/xtest/tuxedo_monitor_config.yaml'
+
+#variables
+tuxedo_application=""
+
+# Initialize metrics and labels
+metrics = {}
+labels = {}
+
+# Define the pattern to ignore in the output
+ignore_pattern = re.compile(r'ulimit: core file size: cannot modify limit: Operation not permitted')
+
+# Define the request handler for the HTTP server
+class TuxedoMetricsHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == '/metrics':
+            collect_tuxedo_metrics()
+            self.send_response(200)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            for key, value in metrics.items():
+                label = labels.get(key, '')
+                self.wfile.write('{}{{{}}} {}\n'.format(key, label, value))
+
+# Parse the YAML configuration
+def parse_yaml_config():
+    global default_http_port, default_frequency
+    if os.path.isfile(config_file_path):
+        with open(config_file_path, 'r') as file:
+            config_data = file.read()
+#        config = yaml.load(config_data, Loader=yaml.FullLoader)
+        config = yaml.load(config_data, Loader=yaml.Loader)
+        if 'http_port' in config:
+            default_http_port = config['http_port']
+        if 'frequency' in config:
+            default_frequency = config['frequency']
+        if 'name' in config:
+            tuxedo_application = config['name'] 
+        return config  # Return the loaded configuration
+
+# Parse command output and update metrics and labels
+def parse_command_output(output):
+    lines = output.split('\n')
+    for line in lines:
+        # Check if the line matches the pattern to ignore
+        if ignore_pattern.search(line):
+            continue  # Skip this line
+        # Extract relevant information from the output using regular expressions
+        match = re.search(r'(Normal|Critical): comp=(\w+).+(All \d+ Tuxedo processes are running|\d+ proxies are running|all proxies are running|\d+ proxies missing)', line)
+        if match:
+            status, tux_comp, message = match.group(1), match.group(2), match.group(3)
+            status_value = 2 if status == 'Normal' else 1
+            tuxedo_process_status_metric = 'tuxedo_process_status'
+            tuxedo_running_process_metric = 'tuxedo_running_process'
+            tuxedo_proxy_status_metric = 'tuxedo_proxy_status'
+            tuxedo_missing_proxies_metric = 'tuxedo_missing_proxies'
+
+            # Metrics
+            metrics['{0}{{tux_comp="{1}", tuxedo_process_status_message="{2}"}}'.format(tuxedo_process_status_metric, tux_comp, message)] = status_value
+            labels['{0}{{tux_comp="{1}", tuxedo_process_status_message="{2}"}}'.format(tuxedo_process_status_metric, tux_comp, message)] = ''
+
+            if status == 'Normal':
+                if "All" in message:
+                    running_processes = re.search(r'All (\d+)', message)
+                    if running_processes:
+                        running_processes = int(running_processes.group(1))
+                        metrics['{0}{{tux_comp="{1}", tuxedo_process_status_message="{2}"}}'.format(tuxedo_running_process_metric, tux_comp, message)] = running_processes
+                        labels['{0}{{tux_comp="{1}", tuxedo_process_status_message="{2}"}}'.format(tuxedo_running_process_metric, tux_comp, message)] = ''
+
+                elif "all proxies are running" in message:
+                    metrics['{0}{{tux_comp="{1}", tuxedo_proxy_status_message="{2}"}}'.format(tuxedo_proxy_status_metric, tux_comp, message)] = status_value
+                    labels['{0}{{tux_comp="{1}", tuxedo_proxy_status_message="{2}"}}'.format(tuxedo_proxy_status_metric, tux_comp, message)] = ''
+                    metrics['{0}{{tux_comp="{1}", tuxedo_proxy_status_message="{2}"}}'.format(tuxedo_missing_proxies_metric, tux_comp, message)] = 0
+                    labels['{0}{{tux_comp="{1}", tuxedo_proxy_status_message="{2}"}}'.format(tuxedo_missing_proxies_metric, tux_comp, message)] = ''
+                elif "proxies missing" in message:
+                    missing_proxies = re.search(r'(\d+) proxies missing', message)
+                    if missing_proxies:
+                        missing_proxies = int(missing_proxies.group(1))
+                        metrics['{0}{{tux_comp="{1}", tuxedo_proxy_status_message="{2}"}}'.format(tuxedo_missing_proxies_metric, tux_comp, message)] = missing_proxies
+                        labels['{0}{{tux_comp="{1}", tuxedo_proxy_status_message="{2}"}}'.format(tuxedo_proxy_status_metric, tux_comp, message)] = ''
+            else:
+                missing_proxies = re.search(r'(\d+) proxies are running', message)
+                if missing_proxies:
+                    missing_proxies = int(missing_proxies.group(1))
+                    metrics['{0}{{tux_comp="{1}", tuxedo_proxy_status_message="{2}"}}'.format(tuxedo_missing_proxies_metric, tux_comp, message)] = missing_proxies
+                    labels['{0}{{tux_comp="{1}", tuxedo_proxy_status_message="{2}"}}'.format(tuxedo_proxy_status_metric, tux_comp, message)] = ''
+
+# Function to collect Tuxedo metrics
+def collect_tuxedo_metrics():
+    global metrics, labels
+
+    # Execute commands and update metrics
+    config = parse_yaml_config()  # Load the configuration here
+    for app in config.get('applications', []):
+        command = app.get('command')
+        if command:
+            output = subprocess.check_output(command, shell=True)
+            parse_command_output(output)
+
+# Main function
+def main():
+    parse_yaml_config()
+
+    # Start an HTTP server to expose metrics
+    server = HTTPServer(('127.0.0.1', default_http_port), TuxedoMetricsHandler)
+    print("Started HTTP server on port {0}".format(default_http_port))
+
+    while True:
+        server.handle_request()
+
+if __name__ == '__main__':
+    main()
