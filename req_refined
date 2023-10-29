@@ -1,0 +1,181 @@
+I have a YAML File whose content looks like below.
+
+http_port: 8000
+frequency: 60
+
+applications:
+  - name: TOP
+    command: gxrun TOP gx_watch
+
+  - name: GCSS
+    command: gxrun GCSS gx_watch
+
+  - name: GHDER
+    command: gxrun GHDER gx_watch
+
+  - name: REST
+    command: gxrun REST gx_watch
+
+  - name: DPEService
+    command: gxrun DPEService gx_watch
+
+  - name: MPCService
+    command: gxrun MPCService gx_watch
+
+  - name: ExternalShellExecutor
+    command: gxrun ExternalShellExecutor gx_watch
+
+  - name: DDREST
+    command: gxrun DDREST gx_watch
+
+Now I need a python script, that is compatible with python 2.7 version and it should not have any dependencies on the third party libraries. I only have those libraries that come by
+default with python 2.7. This script should not have any hardcoding and should follow all coding standards and also must comply with probe format.
+
+The python script must execute the commands that i will be listing in the yaml file and parse the output line by line expose the metrics as I have explained below.
+
+the yaml will be present in location /opt/apps/gxadm/xtest/tuxedo_monitor_config.yaml
+
+
+the python script should keep exposing the metrics continuously  in prometheus format at a HTTP endpoint at the port that is specified in the yaml file and at the frequency mentioned in the yaml file. 
+If no port or frequency is specified in yaml file, then default port must be 8000 and default frequency must be 60 and please frequency will be in seconds.
+
+Now coming to logic for capturing the metrics by parsing the output of the command..
+
+Scenario 1:
+============
+If the line contains word "processes" then, following metrics and labels must be captured..
+
+Metrics:
+    - tuxedo_process_status
+    - tuxedo_total_processes
+    - tuxedo_missing_processes
+the above three metrics must have below listed labels:
+    - tux_comp
+    - tux_process_status_message
+
+Logic:
+
+	- identify if the line is of pattern: Normal: comp=TOP All 10 Tuxedo processes are running
+		- parse the line so the below are the values..
+                     - tuxedo_process_status = Normal [ 2 if Normal, 1 if Critical and 0 if anything else ]
+                     - tuxedo_total_processes = 10
+                     - tuxedo_missing_processes = 0
+                     - tux_comp = TOP
+                     - tux_proccess_status_message = All 10 Tuxedo processes are running
+		     
+	   Output should look like:
+			tuxedo_total_processes{tux_comp="TOP", tux_process_status_message="All 10 Tuxedo processes are running"} 10
+        		tuxedo_process_status{tux_comp="TOP", tuxedo_process_status_message="All 10 Tuxedo processes are running"} 2
+        		tuxedo_missing_processes{tux_comp="TOP", tuxedo_process_status_message="All 10 Tuxedo processes are running"} 0
+
+         - identify if the line is of pattern: Critical: comp=GCSS Missing in total 2 out of 205 Tuxedo processes
+		 -  parse the line so the below are the values..
+    		     - 	tuxedo_process_status = Critical [ 2 if Normal, 1 if Critical and 0 if anything else ]
+                     -  tuxedo_total_processes = 205
+                     -  tuxedo_missing_processes = 2 
+                     -  tux_comp = GCSS
+                     -  tux_process_status_message = Missing in total 2 out of 205 Tuxedo processes         
+
+	   Output should look like:
+			tuxedo_total_processes{tux_comp="TOP", tux_process_status_message="Missing in total 2 out of 205 Tuxedo processes"} 205
+        		tuxedo_process_status{tux_comp="TOP", tuxedo_process_status_message="Missing in total 2 out of 205 Tuxedo processes"} 1
+        		tuxedo_missing_processes{tux_comp="TOP", tuxedo_process_status_message="Missing in total 2 out of 205 Tuxedo processes"} 2
+      
+
+
+Scenario 2:
+=============
+
+If the line contains word "proxies" then, following metrics and labels must be captured..
+
+Metrics:
+   - tuxedo_missing_proxies
+   - tuxedo_proxy_status
+the above two metrics must have below listed labels:
+   - tux_comp
+   - tux_proxy_status_message
+
+Logic:
+	- identify if the line is of pattern: Normal: comp=TOP all proxies are running
+		-  parse the line so the below are the values..
+		   	- tuxedo_proxy_status = Normal [ 2 if Normal, 1 if Critical and 0 if anything else ]
+                        - tuxedo_missing_proxies = 0
+                        - tux_comp = TOP
+                        - tux_proxy_status_message = all proxies are running
+
+	   Output should look like:
+			tuxedo_proxy_status{tux_comp="TOP", tux_proxy_status_message="all proxies are running"} 2
+        		tuxedo_missing_proxies{tux_comp="TOP", tux_proxy_status_message="all proxies are running"} 0
+        		
+
+	- identify if the line is of pattern: Critical: comp=GHDER 12 proxies missing
+		-  parse the line so the below are the values..
+		   	- tuxedo_proxy_status = Critical [ 2 if Normal, 1 if Critical and 0 if anything else ]
+                        - tuxedo_missing_proxies = 12
+                        - tux_comp = GHDER
+                        - tux_proxy_status_message = 12 proxies missing
+
+	   Output should look like:
+			tuxedo_proxy_status{tux_comp="GHDER", tux_proxy_status_message="12 proxies missing"} 1
+        		tuxedo_missing_proxies{tux_comp="GHDER", tux_proxy_status_message="12 proxies missing"} 12
+
+	- identify if the line is of pattern: Normal: all proxies are running
+		-  parse the line so the below are the values..
+		   	- tuxedo_proxy_status = Normal [ 2 if Normal, 1 if Critical and 0 if anything else ]
+                        - tuxedo_missing_proxies = 0
+                        - tux_proxy_status_message = all proxies are running
+                        - tux_comp:
+                                value of this label should be taken from YAML file. It is the name of the command that is being run. i.e. value of "name:" in yaml file.
+				Now suppose, the value is TOP, then tux_comp = TOP
+
+	   Output should look like:
+			tuxedo_proxy_status{tux_comp="TOP", tux_proxy_status_message="all proxies are running"} 2
+        		tuxedo_missing_proxies{tux_comp="TOP", tux_proxy_status_message="all proxies are running"} 0       
+
+
+Did you get what I mean? Are you absolutely clear?
+
+Make sure to use this class in the script:
+
+# Define the request handler for the HTTP server
+class TuxedoMetricsHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == '/metrics':
+            collect_tuxedo_metrics()
+            self.send_response(200)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            for key, value in metrics.items():
+                label = labels.get(key, '')
+                self.wfile.write('{}{{{}}} {}\n'.format(key, label, value))
+
+
+Normal: comp=ARCHIVE All 5 Tuxedo processes are running
+Normal: comp=TOP All 10 Tuxedo processes are running
+Normal: comp=GHDER All 13 Tuxedo processes are running
+Normal: comp=DNET All 25 Tuxedo processes are running
+Normal: comp=REST All 9 Tuxedo processes are running
+Normal: comp=DPEService All 16 Tuxedo processes are running
+Normal: comp=MPCService All 6 Tuxedo processes are running
+
+Critical: comp=ExternalShellExecutor Missing in total 11 out of 15 Tuxedo processes
+Critical: comp=DDREST Missing in total 4 out of 9 Tuxedo processes
+Critical: comp=GCSS Missing in total 2 out of 205 Tuxedo processes
+
+Normal: comp=ARCHIVE all proxies are running
+Normal: comp=TOP all proxies are running
+
+Normal: comp=GCSS all proxies are running
+Normal: comp=DNET all proxies are running
+Normal: all proxies are running [REST]
+Normal: comp=DPEService all proxies are running
+Normal: comp=MPCService all proxies are running
+Normal: comp=ExternalShellExecutor all proxies are running
+Normal: all proxies are running [DDREST]
+
+Critical: comp=GHDER 12 proxies missing
+
+
+/opt/apps/gxadm/GCSS/dnet.profile: line 19: ulimit: core file size: cannot modify limit: Operation not permitted
+
+
